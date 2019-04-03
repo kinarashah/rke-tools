@@ -110,6 +110,7 @@ func init() {
 }
 
 func main() {
+	log.Infof("kinara entered")
 	err := os.Setenv("ETCDCTL_API", "3")
 	if err != nil {
 		log.Fatal(err)
@@ -195,29 +196,31 @@ func RollingBackupCommand() cli.Command {
 }
 
 func SetLoggingLevel(debug bool) {
-	if debug {
-		log.SetLevel(log.DebugLevel)
-	} else {
-		log.SetLevel(log.InfoLevel)
-	}
+	//if debug {
+	//	log.SetLevel(log.DebugLevel)
+	//} else {
+	log.SetLevel(log.InfoLevel)
+	//}
 }
 
 func RollingBackupAction(c *cli.Context) error {
 	SetLoggingLevel(c.Bool("debug"))
 
-	creationPeriod := c.Duration("creation")
-	retentionPeriod := c.Duration("retention")
+	//creationPeriod := c.Duration("creation")
+	//retentionPeriod := c.Duration("retention")
+	creationPeriod := 5 * time.Minute
+	retentionPeriod := 5 * time.Minute
 	etcdCert := c.String("cert")
 	etcdCACert := c.String("cacert")
 	etcdKey := c.String("key")
 	etcdEndpoints := c.String("endpoints")
-	if creationPeriod == 0 || retentionPeriod == 0 {
-		log.WithFields(log.Fields{
-			"creation":  creationPeriod,
-			"retention": retentionPeriod,
-		}).Errorf("Creation period and/or retention are not set")
-		return fmt.Errorf("Creation period and/or retention are not set")
-	}
+	//if creationPeriod == 0  {
+	//	log.WithFields(log.Fields{
+	//		"creation":  creationPeriod,
+	//		"retention": retentionPeriod,
+	//	}).Errorf("Creation period and/or retention are not set")
+	//	return fmt.Errorf("Creation period and/or retention are not set")
+	//}
 
 	if len(etcdCert) == 0 || len(etcdCACert) == 0 || len(etcdKey) == 0 {
 		log.WithFields(log.Fields{
@@ -267,7 +270,7 @@ func RollingBackupAction(c *cli.Context) error {
 		}
 		prefix := getNamePrefix(backupName)
 		// we only clean named backups if we have a retention period and a cluster name prefix
-		if retentionPeriod != 0 && len(prefix) != 0 {
+		if len(prefix) != 0 {
 			if err := DeleteNamedBackups(retentionPeriod, prefix); err != nil {
 				return err
 			}
